@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: nest-ai
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: OPENAI_API_KEY
+        value: your-openai-api-key
+      - key: ASSISTANT_ID
+        value: your-assistant-id
+      - key: PORT
+        value: 3000
