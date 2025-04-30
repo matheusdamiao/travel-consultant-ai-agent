@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 // import { LangflowClient } from '@datastax/langflow-client';
+import { ConfigService } from '@nestjs/config';
 import OpenAI from 'openai';
 import { MessageContent } from 'openai/resources/beta/threads/messages';
 import { getThreadForUser, saveThreadForUser } from './utils/thread-storage';
@@ -21,12 +22,16 @@ interface RequiredAction {
 
 @Injectable()
 export class AppService {
-  private openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY,
-  });
-  private assistantId = process.env.ASSISTANT_ID;
-
+  private openai: OpenAI;
+  private assistantId: any;
   private DEMO_USER_ID = 'user-123';
+
+  constructor(private readonly configService: ConfigService) {
+    this.openai = new OpenAI({
+      apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+    });
+    this.assistantId = this.configService.get<string>('ASSISTANT_ID');
+  }
 
   private buscarPacotesViagemdoSite = buscarPacotesViagemdoSite;
   private getWeather = getWeather;
