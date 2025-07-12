@@ -9,7 +9,7 @@ import { QueueAgentService } from '../queue-agent/queue-agent.service';
 export class WhatsappController {
   constructor(private readonly queueAgentService: QueueAgentService) {}
 
-  @Post()
+  @Post('webhooks')
   async receiveMessageNotification(@Body() body: any): Promise<void> {
     if (body.field === 'messages' && body.value?.messages?.length) {
       const message = body.value.messages[0];
