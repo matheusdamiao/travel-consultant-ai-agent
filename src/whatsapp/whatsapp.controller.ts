@@ -22,6 +22,8 @@ export class WhatsappController {
       const assistantRes =
         await this.queueAgentService.chatWithQueueAgent(text);
 
+      console.log('Assistant Response:', assistantRes);
+
       return new Promise<void>((resolve) => {
         setTimeout(() => {
           console.log(`Received message from ${from}: ${text}`);
