@@ -12,6 +12,14 @@ export class WhatsappController {
   @Post('webhooks')
   async receiveMessageNotification(@Body() body: any): Promise<void> {
     console.log('Received webhook event:', body);
+
+    let changes = body.entry?.[0]?.changes?.[0];
+    if (!changes) {
+      console.log('No fields found in the webhook body');
+      return;
+    } 
+    console.log('Fields:', changes);
+
     if (body.field === 'messages' && body.value?.messages?.length) {
       const message = body.value.messages[0];
       const from = message.from;
