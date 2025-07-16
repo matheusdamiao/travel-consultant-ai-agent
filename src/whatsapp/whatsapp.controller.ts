@@ -29,7 +29,7 @@ export class WhatsappController {
     const text: string = msg.text?.body ?? '';
     const displayPhoneNumber: string = changes.value.metadata?.display_phone_number ?? '';
     const fromPhoneNumber: string = msg.from ?? '';
-      const assistantRes =
+      const assistantRes: any =
         await this.queueAgentService.chatWithQueueAgent(text);
 
       console.log('Assistant Response:', assistantRes);
@@ -41,7 +41,7 @@ export class WhatsappController {
           messaging_product: 'whatsapp',
           to: fromPhoneNumber,
           text: {
-            body: assistantRes,
+            body: assistantRes[0].text.value,
           },
         },
         {
