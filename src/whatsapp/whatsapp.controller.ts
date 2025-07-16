@@ -3,6 +3,7 @@ import { Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import { Body } from '@nestjs/common';
 import { QueueAgentService } from '../queue-agent/queue-agent.service';
+import axios from 'axios';
 
 @Injectable()
 @Controller('whatsapp')
@@ -20,32 +21,48 @@ export class WhatsappController {
     } 
     console.log('Fields:', changes);
 
-    if (body.field === 'messages' && body.value?.messages?.length) {
-      const message = body.value.messages[0];
-      const from = message.from;
-      const text = message.text?.body;
-
-      // Add this to the constructor
-
-      // Example usage inside the method
+    let msg = changes.value.messages?.[0];
+    if (!msg) {
+      console.log('No messages found in the webhook body');
+      return;
+    }
+    const text: string = msg.text?.body ?? '';
+    const displayPhoneNumber: string = changes.value.metadata?.display_phone_number ?? '';
+    const fromPhoneNumber: string = msg.from ?? '';
       const assistantRes =
         await this.queueAgentService.chatWithQueueAgent(text);
 
       console.log('Assistant Response:', assistantRes);
 
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          console.log(`Received message from ${from}: ${text}`);
-          resolve();
-        }, 1000);
-      });
-      // Process the message as needed
-    } else {
-      console.log(
-        'Received non-message notification or invalid payload:',
-        body,
+      try {
+         const res = await axios.post(
+        `https://graph.facebook.com/v22.0/${displayPhoneNumber}/messages`,
+        {
+          messaging_product: 'whatsapp',
+          to: fromPhoneNumber,
+          text: {
+            body: assistantRes,
+          },
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+          },
+        },
       );
-    }
+      console.log('WhatsApp API Response:', res.data);
+        
+      } catch (error) {
+        console.error('Error sending message:', error);
+        return;
+        
+      }
+
+     
+
+
+     
   }
 
   @Get('health')
