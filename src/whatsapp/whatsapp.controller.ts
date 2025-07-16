@@ -27,7 +27,7 @@ export class WhatsappController {
       return;
     }
     const text: string = msg.text?.body ?? '';
-    const displayPhoneNumber: string = changes.value.metadata?.display_phone_number ?? '';
+    const displayPhoneNumber: string = changes.value.metadata?.phone_number_id ?? '';
     const fromPhoneNumber: string = msg.from ?? '';
       const assistantRes: any =
         await this.queueAgentService.chatWithQueueAgent(text);
