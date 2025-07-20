@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import axios from 'axios';
 import OpenAI from 'openai';
 import { MessageContent } from 'openai/resources/beta/threads/messages';
 import { getThreadForUser, saveThreadForUser } from 'src/utils/thread-storage';
@@ -36,7 +37,7 @@ export class QueueAgentService {
     this.assistantId = this.configService.get<string>('ASSISTANT_ID_MINIONS');
   }
 
-  async chatWithQueueAgent(input: string): Promise<string | MessageContent[]> {
+  async chatWithQueueAgent(input: string, zapId?: string, clientPhoneNumber?: string): Promise<string | MessageContent[]> {
     try {
       // Reuse or create a thread
       let threadId = getThreadForUser(this.DEMO_USER_ID);
@@ -57,7 +58,7 @@ export class QueueAgentService {
       });
 
       // Process and return response
-      return await this.processThread(threadId);
+      return await this.processThread(threadId, zapId, clientPhoneNumber);
     } catch (error) {
       console.error('Erro ao processar a conversa:', error);
       return 'Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.';
@@ -66,6 +67,8 @@ export class QueueAgentService {
 
   private async processThread(
     threadId: string,
+    zapId?: string,
+    clientPhoneNumber?: string,
   ): Promise<string | MessageContent[]> {
     // Iniciar a execução da thread
     const run = await this.openai.beta.threads.runs.create(threadId, {
@@ -90,6 +93,8 @@ export class QueueAgentService {
           threadId,
           run.id,
           updatedRun.required_action,
+          zapId,
+          clientPhoneNumber,
         );
       }
 
@@ -109,6 +114,8 @@ export class QueueAgentService {
     threadId: string,
     runId: string,
     requiredAction: RequiredAction,
+    zapId?: string,
+    clientPhoneNumber?: string,
   ) {
     for (const toolCall of requiredAction.submit_tool_outputs.tool_calls) {
       const functionName: string = toolCall.function.name;
@@ -116,12 +123,52 @@ export class QueueAgentService {
 
       console.log('Chamando função:', functionName);
 
+      
+
       // if (functionName === 'buscar_pacotes_viagem') {
       //   functionResponse = this.buscarPacotesViagem();
       //   console.log('Pacotes de viagem:', functionResponse);
       // } else if (functionName === 'prever_clima_checkin') {
       //   functionResponse = this.preverClimaCheckin();
       // }
+
+      if(functionName === 'sendImage'){
+      const args = JSON.parse(toolCall.function.arguments);
+        const { imageUrl, courseUrl } = args;
+        let res = `Image sent: ${imageUrl} (course: ${courseUrl})`;  
+        console.log('arguments', args);
+
+       
+
+         functionResponse = JSON.stringify(res, null, 2);
+        console.log('retorno da função:', functionResponse);
+      try {
+          // Example WhatsApp API call (customize as needed)
+          await axios.post(`https://graph.facebook.com/v22.0/${zapId}/messages`, {
+            messaging_product: 'whatsapp',
+            to: clientPhoneNumber,
+            type: 'image',
+            image: {
+              link: imageUrl,
+              caption: `Link do curso para maiores informações: ${courseUrl}`,
+            },
+          }, {
+            headers: {
+              'Authorization': `Bearer ${process.env.WHATSAPP_ACCESS_TOKEN}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          // For now, just return a confirmation string
+           `Image sent: ${imageUrl} (course: ${courseUrl})`;
+        } catch (error) {
+          console.error('Error sending image:', error);
+          return 'Failed to send image.';
+        }
+
+
+
+      }
 
       if (functionName === 'buscarPacotesViagem') {
         const args = JSON.parse(toolCall.function.arguments);
