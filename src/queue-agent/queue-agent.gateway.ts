@@ -22,8 +22,8 @@ export class QueueAgentGateway {
     console.log('Received message:', payload);
     // Here you can process the message and emit a response if needed
 
-    const res = await this.queueAgentService.chatWithQueueAgent(payload.input);
+    // const res = await this.queueAgentService.chatWithQueueAgent(payload.input);
 
-    this.server.emit('message', { data: res });
+    // this.server.emit('message', { data: res });
   }
 }

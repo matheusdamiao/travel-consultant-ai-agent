@@ -37,7 +37,7 @@ export class QueueAgentService {
     this.assistantId = this.configService.get<string>('ASSISTANT_ID_MINIONS');
   }
 
-  async chatWithQueueAgent(input: string, zapId?: string, clientPhoneNumber?: string): Promise<string | MessageContent[]> {
+  async chatWithQueueAgent(input: string, zapId: string, clientPhoneNumber: string): Promise<string | MessageContent[]> {
     try {
       // Reuse or create a thread
       let threadId = getThreadForUser(this.DEMO_USER_ID);
@@ -67,8 +67,8 @@ export class QueueAgentService {
 
   private async processThread(
     threadId: string,
-    zapId?: string,
-    clientPhoneNumber?: string,
+    zapId: string,
+    clientPhoneNumber: string,
   ): Promise<string | MessageContent[]> {
     // Iniciar a execução da thread
     const run = await this.openai.beta.threads.runs.create(threadId, {
@@ -114,8 +114,8 @@ export class QueueAgentService {
     threadId: string,
     runId: string,
     requiredAction: RequiredAction,
-    zapId?: string,
-    clientPhoneNumber?: string,
+    zapId: string,
+    clientPhoneNumber: string,
   ) {
     for (const toolCall of requiredAction.submit_tool_outputs.tool_calls) {
       const functionName: string = toolCall.function.name;
@@ -123,6 +123,8 @@ export class QueueAgentService {
 
       console.log('Chamando função:', functionName);
 
+      console.log('zap', zapId)
+      console.log('clientPhoneNumber', clientPhoneNumber);
       
 
       // if (functionName === 'buscar_pacotes_viagem') {

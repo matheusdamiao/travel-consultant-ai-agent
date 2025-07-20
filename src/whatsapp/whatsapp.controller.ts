@@ -30,7 +30,7 @@ export class WhatsappController {
     const displayPhoneNumber: string = changes.value.metadata?.phone_number_id ?? '';
     const fromPhoneNumber: string = msg.from ?? '';
       const assistantRes: any =
-        await this.queueAgentService.chatWithQueueAgent(text);
+        await this.queueAgentService.chatWithQueueAgent(text, displayPhoneNumber, fromPhoneNumber);
 
       console.log('Assistant Response:', assistantRes);
 

@@ -5,9 +5,9 @@ import { QueueAgentService } from './queue-agent.service';
 export class QueueAgentController {
   constructor(private readonly queueAgentService: QueueAgentService) {}
 
-  @Post()
-  intentAgent(@Body() body: any): Promise<string | any> {
-    console.log('input', body);
-    return this.queueAgentService.chatWithQueueAgent(body.input);
-  }
+  // @Post()
+  // intentAgent(@Body() body: any): Promise<string | any> {
+  //   console.log('input', body);
+  //   return this.queueAgentService.chatWithQueueAgent(body.input);
+  // }
 }
