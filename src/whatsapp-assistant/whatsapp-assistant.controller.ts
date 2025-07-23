@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query, Res } from '@nestjs/common';
 import { WhatsAppAssistantService } from './whatsapp-assistant.service';
 import axios from 'axios';
+import { Response } from 'express';
 
 @Controller('whatsapp-assistant')
 export class WhatsAppAssistantController {
@@ -11,6 +12,21 @@ export class WhatsAppAssistantController {
   //   console.log('input', body);
   //   return this.queueAgentService.chatWithQueueAgent(body.input);
   // }
+
+   @Get('webhooks')
+  authWebhook(
+    @Query('hub.mode') mode: string,
+    @Query('hub.challenge') challenge: string,
+    @Query('hub.verify_token') token: string,
+    @Res() res: Response,
+  ) {
+    const VERIFY_TOKEN = 'minionsforever';
+    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
+      return res.status(200).send(challenge);
+    } else {
+      return res.sendStatus(403);
+    }
+  }
 @Post('webhooks')
   async receiveMessageNotification(@Body() body: any): Promise<void> {
     console.log('Received webhook event:', body);

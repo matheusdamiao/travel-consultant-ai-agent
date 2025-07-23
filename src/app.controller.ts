@@ -44,11 +44,11 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
   // Extract message from webhook body
   const getMessageFromWebhook = (body: any): string | undefined => {
     // Try to get message from 'receivedMessage'
-    if (body.messages.receivedMessage.length) {
+    if (body.messages.receivedMessage) {
     return body.messages.receivedMessage[0].body;
     }
     // Try to get message from 'receivedAllMessage'
-    if (body.messages.receivedAllMessage.length) {
+    if (body.messages.receivedAllMessage) {
     return body.messages.receivedAllMessage[0].body;
     }
     return undefined;
