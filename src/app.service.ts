@@ -118,14 +118,7 @@ export class AppService {
 
       console.log('Chamando função:', functionName);
 
-      // if (functionName === 'buscar_pacotes_viagem') {
-      //   functionResponse = this.buscarPacotesViagem();
-      //   console.log('Pacotes de viagem:', functionResponse);
-      // } else if (functionName === 'prever_clima_checkin') {
-      //   functionResponse = this.preverClimaCheckin();
-      // }
-
-      if (functionName === 'buscarPacotesViagem') {
+         if (functionName === 'buscarPacotesViagem') {
         const args = JSON.parse(toolCall.function.arguments);
         console.log('arguments', args);
         console.log(

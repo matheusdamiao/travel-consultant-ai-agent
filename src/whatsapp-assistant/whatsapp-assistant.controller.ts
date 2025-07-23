@@ -1,16 +1,17 @@
-import { Controller, Injectable, Post } from '@nestjs/common';
-import { Get, Query, Res } from '@nestjs/common';
-import { Response } from 'express';
-import { Body } from '@nestjs/common';
-import { QueueAgentService } from '../queue-agent/queue-agent.service';
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { WhatsAppAssistantService } from './whatsapp-assistant.service';
 import axios from 'axios';
 
-@Injectable()
-@Controller('whatsapp')
-export class WhatsappController {
-  constructor(private readonly queueAgentService: QueueAgentService) {}
+@Controller('whatsapp-assistant')
+export class WhatsAppAssistantController {
+  constructor(private readonly whatsAppAssistantService: WhatsAppAssistantService) {}
 
-  @Post('webhooks')
+  // @Post()
+  // intentAgent(@Body() body: any): Promise<string | any> {
+  //   console.log('input', body);
+  //   return this.queueAgentService.chatWithQueueAgent(body.input);
+  // }
+@Post('webhooks')
   async receiveMessageNotification(@Body() body: any): Promise<void> {
     console.log('Received webhook event:', body);
 
@@ -30,7 +31,7 @@ export class WhatsappController {
     const displayPhoneNumber: string = changes.value.metadata?.phone_number_id ?? '';
     const fromPhoneNumber: string = msg.from ?? '';
       const assistantRes: any =
-        await this.queueAgentService.chatWithQueueAgent(text, displayPhoneNumber, fromPhoneNumber);
+        await this.whatsAppAssistantService.chatWithQueueAgent(text, displayPhoneNumber, fromPhoneNumber);
 
       console.log('Assistant Response:', assistantRes);
 
@@ -59,41 +60,6 @@ export class WhatsappController {
         
       }
 
-     
 
-
-     
-  }
-
-  @Get('health')
-  healthCheck(): string {
-    return 'WhatsApp service is running';
-  }
-
-  @Get('webhooks')
-  authWebhook(
-    @Query('hub.mode') mode: string,
-    @Query('hub.challenge') challenge: string,
-    @Query('hub.verify_token') token: string,
-    @Res() res: Response,
-  ) {
-    const VERIFY_TOKEN = 'minionsforever';
-
-    if (mode === 'subscribe' && token === VERIFY_TOKEN) {
-      return res.status(200).send(challenge);
-    } else {
-      return res.sendStatus(403);
-    }
-  }
-
-  // @Post('webhooks')
-  // @HttpCode(200)
-  // handleEventNotification(
-  //   @Body() body: any,
-  //   @Headers('x-hub-signature-256') signature: string,
-  // ): void {
-  //   // Optionally, verify the signature here for security
-  //   console.log('Received webhook event:', body);
-  //   // Process the webhook event as needed
-  // }
+}
 }

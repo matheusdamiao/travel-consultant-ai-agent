@@ -25,7 +25,7 @@ interface RequiredAction {
 // //       4) the assistant answers the user to transfer the chat to a specialized human agent
 // //       4) the chat now is visible in the queue and a user can respond to it
 @Injectable()
-export class QueueAgentService {
+export class WhatsAppAssistantService {
   private openai: OpenAI;
   private assistantId: string | any;
   private DEMO_USER_ID = 'user-123';
@@ -127,13 +127,6 @@ export class QueueAgentService {
       console.log('clientPhoneNumber', clientPhoneNumber);
       
 
-      // if (functionName === 'buscar_pacotes_viagem') {
-      //   functionResponse = this.buscarPacotesViagem();
-      //   console.log('Pacotes de viagem:', functionResponse);
-      // } else if (functionName === 'prever_clima_checkin') {
-      //   functionResponse = this.preverClimaCheckin();
-      // }
-
       if(functionName === 'sendImage'){
       const args = JSON.parse(toolCall.function.arguments);
         const { imageUrl, courseUrl } = args;
@@ -172,35 +165,7 @@ export class QueueAgentService {
 
       }
 
-      if (functionName === 'buscarPacotesViagem') {
-        const args = JSON.parse(toolCall.function.arguments);
-        console.log('arguments', args);
-        console.log(
-          'toolCall.function.arguments typeof',
-          typeof toolCall.function.arguments,
-        );
-        //   functionResponse = await this.buscarPacotesViagemdoSite(
-        //     args.cidade,
-        //     args.dataIda,
-        //     args.dataVolta,
-        //   );
-
-        functionResponse = JSON.stringify(functionResponse, null, 2);
-        console.log('retorno da função:', functionResponse);
-      }
-
-      if (functionName === 'getWeather') {
-        const args = JSON.parse(toolCall.function.arguments);
-        console.log('arguments', args);
-        console.log(
-          'toolCall.function.arguments typeof',
-          typeof toolCall.function.arguments,
-        );
-        //   functionResponse = await this.getWeather(args.latitude, args.longitude);
-        functionResponse = JSON.stringify(functionResponse, null, 2);
-      }
-
-      // Responder à chamada da função com os dados
+        // Responder à chamada da função com os dados
       await this.openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
         tool_outputs: [{ tool_call_id: toolCall.id, output: functionResponse }],
       });

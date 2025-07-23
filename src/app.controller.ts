@@ -1,20 +1,29 @@
 import { Body, Controller, Get, Headers, HttpCode, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
-import { get } from 'http';
+import { HuggyService } from './huggy-assistant/huggy-assistant.service';
+import { ConfigService } from '@nestjs/config';
+
+
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
 
+ private readonly huggyToken: string;
+ 
+  constructor(private readonly configService: ConfigService,
+     private readonly appService: AppService, private readonly huggyService: HuggyService) {
+
+      this.huggyToken =this.configService.get<string>('HUGGY_ACCESS_TOKEN') || '';
+     }
   // @Post()
   // sendMessage(): Promise<string | undefined> {
   //   // return this.appService.sendAImessage();
   // }
 
   @Post()
-  chatWithOpenAIAssistant(@Body() body: any): Promise<string | any> {
+  async chatWithOpenAIAssistant(@Body() body: any): Promise<string | any> {
     console.log('input', body);
-    return this.appService.chatWithOpenAIAssistant(body.input);
+    return await this.appService.chatWithOpenAIAssistant(body.input);
   }
 
 
@@ -26,13 +35,42 @@ export class AppController {
     return `Code received: ${code}`;
   }
 
- @Post('webhook')
-  @HttpCode(200) // Importante: retornar 200 para Huggy saber que recebeu com sucesso
-  handleWebhook(@Body() body: any, @Headers() headers: any): string {
-    console.log('Webhook recebido!', body);
-    console.log('Headers:', headers);
-    // Aqui você pode processar o evento, salvar no banco, acionar lógica, etc.
-    return 'Webhook recebido com sucesso!';
-  }
+@Post('webhook')
+@HttpCode(200) // Importante: retornar 200 para Huggy saber que recebeu com sucesso
+async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string> {
+  console.log('Webhook recebido!', body);
+  console.log('Headers:', headers);
+
+  // Extract message from webhook body
+  const getMessageFromWebhook = (body: any): string | undefined => {
+    // Try to get message from 'receivedMessage'
+    if (body.messages.receivedMessage.length) {
+    return body.messages.receivedMessage[0].body;
+    }
+    // Try to get message from 'receivedAllMessage'
+    if (body.messages.receivedAllMessage.length) {
+    return body.messages.receivedAllMessage[0].body;
+    }
+    return undefined;
+  };
+
+  const message = getMessageFromWebhook(body);
+  console.log('Extracted message:', message);
+
+  const assistantRes: any = await this.appService.chatWithOpenAIAssistant(message ?? '')
+
+  // Enviar resposta para o usuário via Huggy API v3
+  // Exemplo usando fetch (instale node-fetch se necessário)
+  this.huggyService.sendMessageToCustomer(
+    body.chatId, // ID do chat recebido no webhook
+    assistantRes[0].text.value, // Mensagem de resposta do assistente
+     this.huggyToken, // Token de autenticação da Huggy
+  );
+  
+  
+
+  // Aqui você pode processar o evento, salvar no banco, acionar lógica, etc.
+  return 'Webhook recebido com sucesso!';
+}
 
 }

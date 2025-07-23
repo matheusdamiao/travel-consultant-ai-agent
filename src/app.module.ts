@@ -2,21 +2,19 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
-import { QueueAgentModule } from './queue-agent/queue-agent.module';
-import { WhatsappController } from './whatsapp/whatsapp.controller';
-import { QueueAgentController } from './queue-agent/queue-agent.controller';
-import { WhatsAppModule } from './whatsapp/whatsapp.module';
-import { QueueAgentService } from './queue-agent/queue-agent.service';
+import { WhatsAppAssistantController } from './whatsapp-assistant/whatsapp-assistant.controller';
+import {  WhatsAppAssistantService } from './whatsapp-assistant/whatsapp-assistant.service';
+import { WhatsAppAssistantModule } from './whatsapp-assistant/whatsapp-assistant.module';
+import { HuggyService } from './huggy-assistant/huggy-assistant.service';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // Torna as variáveis acessíveis globalmente
     }),
-    QueueAgentModule,
-    WhatsAppModule,
+    WhatsAppAssistantModule,
   ],
-  controllers: [AppController, WhatsappController, QueueAgentController],
-  providers: [AppService, QueueAgentService],
+  controllers: [AppController, WhatsAppAssistantController ],
+  providers: [AppService, WhatsAppAssistantService, HuggyService],
 })
 export class AppModule {}
