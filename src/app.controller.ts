@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Headers, HttpCode, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
+import { get } from 'http';
 
 @Controller()
 export class AppController {
@@ -25,5 +26,13 @@ export class AppController {
     return `Code received: ${code}`;
   }
 
+ @Post('webhook')
+  @HttpCode(200) // Importante: retornar 200 para Huggy saber que recebeu com sucesso
+  handleWebhook(@Body() body: any, @Headers() headers: any): string {
+    console.log('Webhook recebido!', body);
+    console.log('Headers:', headers);
+    // Aqui você pode processar o evento, salvar no banco, acionar lógica, etc.
+    return 'Webhook recebido com sucesso!';
+  }
 
 }
