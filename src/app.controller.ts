@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 
 @Controller()
@@ -15,4 +15,15 @@ export class AppController {
     console.log('input', body);
     return this.appService.chatWithOpenAIAssistant(body.input);
   }
+
+
+
+
+  @Get('auth/callback')
+  authCallbackGet(@Query('code') code: string): string {
+    console.log('OAuth code received:', code);
+    return `Code received: ${code}`;
+  }
+
+
 }

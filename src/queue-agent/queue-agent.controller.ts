@@ -1,7 +1,7 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { QueueAgentService } from './queue-agent.service';
 
-@Controller('minion-agent')
+@Controller('ai-assistent')
 export class QueueAgentController {
   constructor(private readonly queueAgentService: QueueAgentService) {}
 
@@ -10,4 +10,7 @@ export class QueueAgentController {
   //   console.log('input', body);
   //   return this.queueAgentService.chatWithQueueAgent(body.input);
   // }
+
+
+
 }
