@@ -57,7 +57,7 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
   const message = getMessageFromWebhook(body);
   console.log('Extracted message:', message);
 
-  const assistantRes: any = await this.appService.chatWithOpenAIAssistant(message ?? '')
+  const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '')
 
   // Enviar resposta para o usuário via Huggy API v3
   // Exemplo usando fetch (instale node-fetch se necessário)
