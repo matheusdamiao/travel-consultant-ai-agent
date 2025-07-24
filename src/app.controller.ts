@@ -43,12 +43,7 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
 
   // Extract message from webhook body
   const getMessageFromWebhook = (body: any): string | undefined => {
-    // Try to get message from 'receivedMessage'
-    if (body.messages.receivedAllMessage) {
-    return body.messages.receivedMessage[0].body;
-    }
-    // Try to get message from 'receivedAllMessage'
-    if (body.messages.receivedAllMessage) {
+    if (body.messages.receivedAllMessage?.[0]) {
     return body.messages.receivedAllMessage[0].body;
     }
     return undefined;
@@ -59,13 +54,16 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
 
   const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '')
 
-  const receivedMsg = body.messages.receivedAllMessage?.[0];
+ const receivedMsg = body.messages.receivedAllMessage?.[0];
   if (!receivedMsg) return 'Webhook recebido com sucesso!';
 
-  // Only respond if the sender is a client (widget/customer)
-  if (receivedMsg.senderType !== 'widget' && receivedMsg.senderType !== 'customer') {
-    // Message is from agent/bot, do not respond
-    return 'Webhook recebido com sucesso!';
+  // Only respond if the sender is a WhatsApp client and receiver is agent
+  if (
+    receivedMsg.senderType !== 'whatsapp-enterprise' ||
+    receivedMsg.receiverType !== 'agent'
+  ) {
+    // Message is not from client, do not respond
+    return 'Webhook recebido com sucesso! msg não é de cliente';
   }
 
   // ...existing code to process and send message...
@@ -78,7 +76,7 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
   
 
   // Aqui você pode processar o evento, salvar no banco, acionar lógica, etc.
-  return 'Webhook recebido com sucesso!';
+  return 'Webhook recebido com sucesso! msg é de cliente';
 }
 
 }
