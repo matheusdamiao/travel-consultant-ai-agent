@@ -39,12 +39,12 @@ export class AppController {
 @HttpCode(200) // Importante: retornar 200 para Huggy saber que recebeu com sucesso
 async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string> {
   console.log('Webhook recebido!', body);
-  console.log('dados reais:', body.messsages.receivedMessage?.[0]);
+  console.log('dados reais:', body.messsages.receivedAllMessage?.[0]);
 
   // Extract message from webhook body
   const getMessageFromWebhook = (body: any): string | undefined => {
     // Try to get message from 'receivedMessage'
-    if (body.messages.receivedMessage) {
+    if (body.messages.receivedAllMessage) {
     return body.messages.receivedMessage[0].body;
     }
     // Try to get message from 'receivedAllMessage'
