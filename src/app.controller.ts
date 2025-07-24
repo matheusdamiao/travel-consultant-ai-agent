@@ -61,11 +61,11 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
 
   // Enviar resposta para o usuário via Huggy API v3
   // Exemplo usando fetch (instale node-fetch se necessário)
-  // this.huggyService.sendMessageToCustomer(
-  //   body.chat.id, // ID do chat recebido no webhook
-  //   assistantRes[0].text.value, // Mensagem de resposta do assistente
-  //    this.huggyToken, // Token de autenticação da Huggy
-  // );
+  await this.huggyService.sendMessageToCustomer(
+    body.messages.receivedAllMessage[0].chat.id, // ID do chat recebido no webhook
+    assistantRes[0].text.value, // Mensagem de resposta do assistente
+     this.huggyToken, // Token de autenticação da Huggy
+  );
   
   
 

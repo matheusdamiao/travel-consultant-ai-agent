@@ -4,6 +4,7 @@ import axios from "axios";
 import OpenAI from "openai";
 import { MessageContent } from "openai/resources/beta/threads/messages";
 import { getThreadForUser, saveThreadForUser } from "src/utils/thread-storage";
+import { text } from "stream/consumers";
 
 
 interface ToolCall {
@@ -38,6 +39,8 @@ export class HuggyService {
     try {
       // Reuse or create a thread
       let threadId = getThreadForUser(this.DEMO_USER_ID);
+
+      console.log('assistantId', this.assistantId);
 
       if (!threadId) {
         const thread = await this.openai.beta.threads.create();
@@ -129,13 +132,9 @@ export class HuggyService {
 
 
  async sendMessageToCustomer(chatId: number, message: string, token: string) {
-    const url = 'https://api.huggy.io/v3/messages';
+  const url = `https://api.huggy.app/v3/chats/${chatId}messages`;
     const payload = {
-      chat: { id: chatId },
-      message: {
-        type: 'text',
-        value: message,
-      },
+     text: message,
     };
 
     const res = await axios.post(url, payload, {
