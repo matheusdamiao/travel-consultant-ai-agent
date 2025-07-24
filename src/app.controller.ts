@@ -59,12 +59,20 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
 
   const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '')
 
-  // Enviar resposta para o usuário via Huggy API v3
-  // Exemplo usando fetch (instale node-fetch se necessário)
+  const receivedMsg = body.messages.receivedAllMessage?.[0];
+  if (!receivedMsg) return 'Webhook recebido com sucesso!';
+
+  // Only respond if the sender is a client (widget/customer)
+  if (receivedMsg.senderType !== 'widget' && receivedMsg.senderType !== 'customer') {
+    // Message is from agent/bot, do not respond
+    return 'Webhook recebido com sucesso!';
+  }
+
+  // ...existing code to process and send message...
   await this.huggyService.sendMessageToCustomer(
-    body.messages.receivedAllMessage[0].chat.id, // ID do chat recebido no webhook
-    assistantRes[0].text.value, // Mensagem de resposta do assistente
-     this.huggyToken, // Token de autenticação da Huggy
+    receivedMsg.chat.id,
+    assistantRes[0].text.value,
+    this.huggyToken,
   );
   
   
