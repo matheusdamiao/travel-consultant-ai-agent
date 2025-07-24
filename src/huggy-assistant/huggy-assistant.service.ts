@@ -132,7 +132,7 @@ export class HuggyService {
 
 
  async sendMessageToCustomer(chatId: number, message: string, token: string) {
-  const url = `https://api.huggy.app/v3/chats/${chatId}messages`;
+  const url = `https://api.huggy.app/v3/chats/${chatId}/messages`;
     const payload = {
      text: message,
     };
