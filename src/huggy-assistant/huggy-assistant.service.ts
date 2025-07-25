@@ -25,7 +25,7 @@ interface RequiredAction {
 export class HuggyService {
    private openai: OpenAI;
     private assistantId: string | any;
-    private DEMO_USER_ID = 'user-123';
+    // private DEMO_USER_ID = 'user-123';
   
     constructor(private readonly configService: ConfigService) {
       this.openai = new OpenAI({
@@ -35,17 +35,17 @@ export class HuggyService {
     }
 
 
- async chatWithHuggyAgent(input: string): Promise<string | MessageContent[]> {
+ async chatWithHuggyAgent(input: string, customerId: string): Promise<string | MessageContent[]> {
     try {
       // Reuse or create a thread
-      let threadId = getThreadForUser(this.DEMO_USER_ID);
+      let threadId = getThreadForUser(customerId);
 
       console.log('assistantId', this.assistantId);
 
       if (!threadId) {
         const thread = await this.openai.beta.threads.create();
         threadId = thread.id;
-        saveThreadForUser(this.DEMO_USER_ID, threadId);
+        saveThreadForUser(customerId, threadId);
         console.log('Nova thread criada:', threadId);
       } else {
         console.log('Thread existente encontrada:', threadId);
