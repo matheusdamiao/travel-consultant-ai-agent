@@ -52,7 +52,8 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
   const message = getMessageFromWebhook(body);
   console.log('Extracted message:', message);
 
-  const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '', body.chat.customer.id)
+  const customerIdFromHuggy = body.messages.receivedAllMessage[0].chat.customer.id
+  const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy)
 
  const receivedMsg = body.messages.receivedAllMessage?.[0];
   if (!receivedMsg) return 'Webhook recebido com sucesso!';
