@@ -130,7 +130,7 @@ export class HuggyService {
           const payload = {
             "stepId": 33239,
           }
-           const res = await axios.post(url, payload, {
+           const res = await axios.put(url, payload, {
               headers: {
                 Authorization: `Bearer ${this.huggyToken}`,
                 'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export class HuggyService {
           const payload = {
             "stepId": 33242,
           }
-           const res = await axios.post(url, payload, {
+           const res = await axios.put(url, payload, {
               headers: {
                 Authorization: `Bearer ${this.huggyToken}`,
                 'Content-Type': 'application/json',
