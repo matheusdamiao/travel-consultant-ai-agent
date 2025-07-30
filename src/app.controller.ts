@@ -53,16 +53,14 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
   console.log('Extracted message:', message);
 
   const customerIdFromHuggy = body.messages.receivedAllMessage[0].chat.customer.id
-  const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy)
+  const chatData = body.messages.receivedAllMessage[0].chat
+  const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy, chatData)
 
  const receivedMsg = body.messages.receivedAllMessage?.[0];
   if (!receivedMsg) return 'Webhook recebido com sucesso!';
 
   // Only respond if the sender is a WhatsApp client and receiver is agent
-  if (
-    receivedMsg.senderType !== 'whatsapp-enterprise' ||
-    receivedMsg.receiverType !== 'agent'
-  ) {
+  if (receivedMsg.receiverType !== 'agent') {
     // Message is not from client, do not respond
     return 'Webhook recebido com sucesso! msg não é de cliente';
   }

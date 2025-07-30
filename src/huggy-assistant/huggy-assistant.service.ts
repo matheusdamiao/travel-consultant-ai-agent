@@ -25,17 +25,19 @@ interface RequiredAction {
 export class HuggyService {
    private openai: OpenAI;
     private assistantId: string | any;
-    // private DEMO_USER_ID = 'user-123';
+    private readonly huggyToken: string;
+ 
   
     constructor(private readonly configService: ConfigService) {
       this.openai = new OpenAI({
         apiKey: this.configService.get<string>('OPENAI_API_KEY'),
       });
       this.assistantId = this.configService.get<string>('ASSISTANT_ID_HUGGY');
+      this.huggyToken =this.configService.get<string>('HUGGY_ACCESS_TOKEN') || '';
     }
 
 
- async chatWithHuggyAgent(input: string, customerId: string): Promise<string | MessageContent[]> {
+ async chatWithHuggyAgent(input: string, customerId: string, chat: any): Promise<string | MessageContent[]> {
     try {
       // Reuse or create a thread
       let threadId = getThreadForUser(customerId);
@@ -58,7 +60,7 @@ export class HuggyService {
       });
 
       // Process and return response
-      return await this.processThread(threadId);
+      return await this.processThread(threadId, chat);
     } catch (error) {
       console.error('Erro ao processar a conversa:', error);
       return 'Ocorreu um erro ao processar sua solicitação. Tente novamente mais tarde.';
@@ -66,7 +68,8 @@ export class HuggyService {
   }
 
   private async processThread(
-    threadId: string
+    threadId: string,
+    chat: any
   ): Promise<string | MessageContent[]> {
     // Iniciar a execução da thread
     const run = await this.openai.beta.threads.runs.create(threadId, {
@@ -90,7 +93,8 @@ export class HuggyService {
         await this.handleFunctionCalls(
           threadId,
           run.id,
-          updatedRun.required_action
+          updatedRun.required_action,
+          chat
         );
       }
 
@@ -109,7 +113,8 @@ export class HuggyService {
   private async handleFunctionCalls(
     threadId: string,
     runId: string,
-    requiredAction: RequiredAction
+    requiredAction: RequiredAction,
+    chat: any
   ) {
     for (const toolCall of requiredAction.submit_tool_outputs.tool_calls) {
       const functionName: string = toolCall.function.name;
@@ -117,10 +122,46 @@ export class HuggyService {
 
       console.log('Chamando função:', functionName);
 
-      if(functionName === 'acriar'){
-      
-
+      if(functionName === 'registrar_interesse'){
+      // 33239
+        const chatId = chat.id;
+        
+          const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
+          const payload = {
+            "stepId": 33239,
+          }
+           const res = await axios.post(url, payload, {
+              headers: {
+                Authorization: `Bearer ${this.huggyToken}`,
+                'Content-Type': 'application/json',
+              },  });
+            
+           let response = `Workflow atualizado para Pré-qualificação: ${res.data}`;
+           functionResponse = JSON.stringify(response, null, 2);
+           console.log('retorno da função:', functionResponse);
       }
+
+
+
+        if(functionName === 'encaminhar_para_vendas'){
+      // 33239
+        const chatId = chat.id;
+        
+          const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
+          const payload = {
+            "stepId": 33242,
+          }
+           const res = await axios.post(url, payload, {
+              headers: {
+                Authorization: `Bearer ${this.huggyToken}`,
+                'Content-Type': 'application/json',
+              },  });
+
+            let response = `Workflow atualizado para Encaminhar para Vendas: ${res.data}`;
+            functionResponse = JSON.stringify(response, null, 2);
+            console.log('retorno da função:', functionResponse);
+      }
+
 
         // Responder à chamada da função com os dados
       await this.openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
