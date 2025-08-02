@@ -72,10 +72,24 @@ export class HuggyService {
     threadId: string,
     chat: any
   ): Promise<string | MessageContent[]> {
-    // Iniciar a execução da thread
-    const run = await this.openai.beta.threads.runs.create(threadId, {
-      assistant_id: this.assistantId,
-    });
+
+    // Verifica se já existe um run ativo para a thread
+    let activeRun: OpenAI.Beta.Threads.Run | null = null;
+    const runsList = await this.openai.beta.threads.runs.list(threadId);
+    if (runsList && runsList.data && Array.isArray(runsList.data)) {
+      activeRun = runsList.data.find((run) =>
+        ["queued", "in_progress", "requires_action", "cancelling"].includes(run.status)
+      ) || null;
+    }
+
+    let run;
+    if (activeRun) {
+      run = activeRun;
+    } else {
+      run = await this.openai.beta.threads.runs.create(threadId, {
+        assistant_id: this.assistantId,
+      });
+    }
 
     // Monitorar até que a resposta seja finalizada
     while (true) {
