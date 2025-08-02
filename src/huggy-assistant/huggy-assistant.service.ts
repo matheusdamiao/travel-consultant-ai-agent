@@ -54,6 +54,23 @@ export class HuggyService {
         console.log('Thread existente encontrada:', threadId);
       }
 
+      // Antes de adicionar uma nova mensagem, aguarde qualquer run ativo terminar
+      let hasActiveRun = true;
+      while (hasActiveRun) {
+        const runsList = await this.openai.beta.threads.runs.list(threadId);
+        hasActiveRun = false;
+        if (runsList && runsList.data && Array.isArray(runsList.data)) {
+          const activeRun = runsList.data.find((run) =>
+            ["queued", "in_progress", "requires_action", "cancelling"].includes(run.status)
+          );
+          if (activeRun) {
+            hasActiveRun = true;
+            // Aguarda um pouco antes de checar novamente
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+          }
+        }
+      }
+
       // Add user message
       await this.openai.beta.threads.messages.create(threadId, {
         role: 'user',
@@ -150,6 +167,8 @@ export class HuggyService {
                 Authorization: `Bearer ${this.huggyToken}`,
                 'Content-Type': 'application/json',
               },  });
+
+              console.log('Workflow atualizado:', res);
             
            let response = `Workflow atualizado para Pré-qualificação: ${res.data}`;
            functionResponse = JSON.stringify(response, null, 2);

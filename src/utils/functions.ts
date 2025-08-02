@@ -180,13 +180,13 @@ export async function getWeather(
 }
 
 export const encaminharParaVendas = async (
-  chatId: string,
+  chat: any,
   huggyToken: string,
 ): Promise<string> => {
 
 
   ///////////////// Atualiza o workflow para encaminhar para vendas
-              const urlUpdateWorkflow = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
+              const urlUpdateWorkflow = `https://api.huggy.app/v3/chats/${chat.id}/workflow`;
               const payloadWorkflow = {
                 stepId: 33242, // ID do passo de encaminhamento para vendas
               };
@@ -197,17 +197,20 @@ export const encaminharParaVendas = async (
                   'Content-Type': 'application/json',
                 },
               });
+              console.log('Workflow atualizado:', resWorkflow);
 
               console.log('Workflow atualizado:', resWorkflow.data);
 
 
    ///////////// Transferência para o agente Carlos
    
-          const urlTransferToHuman = `https://api.huggy.app/v3/chats/${chatId}/transfer`;
+          const urlTransferToHuman = `https://api.huggy.app/v3/chats/${chat.id}/transfer`;
           const agentId = 20428;
            const payloadTransfer = {
             agentId, // Id do Agente Carlos
           };
+
+          if(chat.situation !== 'wait_for_chat') {
       
           const resTransfer = await axios.post(urlTransferToHuman, payloadTransfer, {
             headers: {
@@ -216,10 +219,10 @@ export const encaminharParaVendas = async (
             },
           });   
           console.log('Transferência para humano realizada:', resTransfer.data);
-
+        }
 
        /////////////// Atualiza a tabulação para "Human in the Chat"
-            const urlUpdateTabulation = `https://api.huggy.app/v3/chats/${chatId}/tabulation`;
+            const urlUpdateTabulation = `https://api.huggy.app/v3/chats/${chat.id}/tabulation`;
               const tabulationId = 72008;
             const bodyTabulation = {
               tabulationId, // ID da tag "Human in the Chat"
