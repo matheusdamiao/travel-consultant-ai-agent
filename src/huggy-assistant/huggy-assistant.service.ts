@@ -148,6 +148,8 @@ export class HuggyService {
     requiredAction: RequiredAction,
     chat: any
   ) {
+    // Coletar todas as respostas das funções
+    const toolOutputs: { tool_call_id: string; output: string }[] = [];
     for (const toolCall of requiredAction.submit_tool_outputs.tool_calls) {
       const functionName: string = toolCall.function.name;
       let functionResponse = '';
@@ -155,127 +157,56 @@ export class HuggyService {
       console.log('Chamando função:', functionName);
 
       if(functionName === 'registrar_interesse'){
-      // 33239
         const chatId = chat.id;
-        
-          const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
-          const payload = {
-            "stepId": 33239,
-          }
-           const res = await axios.put(url, payload, {
-              headers: {
-                Authorization: `Bearer ${this.huggyToken}`,
-                'Content-Type': 'application/json',
-              },  });
-
-              console.log('Workflow atualizado:', res);
-            
-           let response = `Workflow atualizado para Pré-qualificação: ${res.data}`;
-           functionResponse = JSON.stringify(response, null, 2);
-           console.log('retorno da função:', functionResponse);
+        const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
+        const payload = { "stepId": 33239 };
+        const res = await axios.put(url, payload, {
+          headers: {
+            Authorization: `Bearer ${this.huggyToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log('Workflow atualizado:', res);
+        let response = `Workflow atualizado para Pré-qualificação: ${res.data}`;
+        functionResponse = JSON.stringify(response, null, 2);
+        console.log('retorno da função:', functionResponse);
       }
 
-
-
-        if(functionName === 'encaminhar_para_vendas'){
-
-
-          const response = await encaminharParaVendas(chat.id, this.huggyToken);
-        // const chatId = chat.id;
-        
-        //   const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
-        //   const payload = {
-        //     "stepId": 33242,
-        //   }
-        //    const res = await axios.put(url, payload, {
-        //       headers: {
-        //         Authorization: `Bearer ${this.huggyToken}`,
-        //         'Content-Type': 'application/json',
-        //       },  });
-
-        //     let response = `Workflow atualizado para Encaminhar para Vendas: ${res.data}`;
-            functionResponse = JSON.stringify(response, null, 2);
-            console.log('retorno da função:', functionResponse);
+      if(functionName === 'encaminhar_para_vendas'){
+        const response = await encaminharParaVendas(chat, this.huggyToken);
+        functionResponse = JSON.stringify(response, null, 2);
+        console.log('retorno da função:', functionResponse);
       }
 
+      if(functionName === 'enviar_mensagem_interna'){
+        const args = JSON.parse(toolCall.function.arguments);
+        const { name, type_of_company, chat_summary } = args;
+        const chatId = chat.id;
+        let message = `Nome do Lead: ${name}, Tipo de Empresa: ${type_of_company}, Resumo do Chat: ${chat_summary}`;
+        functionResponse = JSON.stringify(message, null, 2);
+        console.log('retorno da função:', functionResponse);
+        const url = `https://api.huggy.app/v3/chats/${chatId}/messages`;
+        const payload = {
+          text: message,
+          isInternal: true, // Marca a mensagem como interna
+        };
+        const res = await axios.post(url, payload, {
+          headers: {
+            Authorization: `Bearer ${this.huggyToken}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        console.log('Message sent to customer:', res.data);
+      }
 
-        if(functionName === 'enviar_mensagem_interna'){
-             const args = JSON.parse(toolCall.function.arguments);
-            const { name, type_of_company, chat_summary } = args;
-
-           const chatId = chat.id;
-            let message = `Nome do Lead: ${name}, Tipo de Empresa: ${type_of_company}, Resumo do Chat: ${chat_summary}`;
-
-            functionResponse = JSON.stringify(message, null, 2);
-
-            console.log('retorno da função:', functionResponse);
-            const url = `https://api.huggy.app/v3/chats/${chatId}/messages`;
-              const payload = {
-              text: message,
-              isInternal: true, // Marca a mensagem como interna
-              };
-
-              const res = await axios.post(url, payload, {
-                headers: {
-                  Authorization: `Bearer ${this.huggyToken}`,
-                  'Content-Type': 'application/json',
-                },
-           });
-
-          console.log('Message sent to customer:', res.data);
-
-        }
-
-
-        // if(functionName === 'add_human_tag_to_the_chat'){
-        
-        //   const chatId = chat.id;
-        //   const url = `https://api.huggy.app/v3/chats/${chatId}/tabulation`;
-        //     const tabulationId = 72008;
-        //   const payload = {
-        //     tabulationId, // ID da tag "Human in the Chat"
-        //   };
-
-      
-        //   const res = await axios.put(url, payload, {
-        //     headers: {
-        //       Authorization: `Bearer ${this.huggyToken}`,
-        //       'Content-Type': 'application/json',
-        //     },
-        //   });
-
-        //   let response = `Tag "Human in the Chat" adicionada: ${res.data}`;
-        //   functionResponse = JSON.stringify(response, null, 2);
-        //   console.log('retorno da função:', functionResponse);
-        // }
-
-
-        // if(functionName === 'transfer_to_human'){
-        //   const chatId = chat.id;
-        //   const agentId = 20428;
-        //   const url = `https://api.huggy.app/v3/chats/${chatId}/transfer`;
-        //    const payload = {
-        //     agentId, // Id do Agente Carlos
-        //   };
-      
-        //   const res = await axios.post(url, payload, {
-        //     headers: {
-        //       Authorization: `Bearer ${this.huggyToken}`,
-        //       'Content-Type': 'application/json',
-        //     },
-        //   });   
-        //   let response = `Transferência para humano realizada: ${res.data}`;
-        //   functionResponse = JSON.stringify(response, null, 2);
-        //   console.log('retorno da função:', functionResponse);
-
-        // }
-
-
-        // Responder à chamada da função com os dados
-      await this.openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
-        tool_outputs: [{ tool_call_id: toolCall.id, output: functionResponse }],
-      });
+      // Adiciona a resposta ao array de outputs
+      toolOutputs.push({ tool_call_id: toolCall.id, output: functionResponse });
     }
+
+    // Envia todas as respostas de uma vez
+    await this.openai.beta.threads.runs.submitToolOutputs(threadId, runId, {
+      tool_outputs: toolOutputs,
+    });
   }
 
 
