@@ -3,6 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 import OpenAI from "openai";
 import { MessageContent } from "openai/resources/beta/threads/messages";
+import { encaminharParaVendas } from "src/utils/functions";
 import { getThreadForUser, saveThreadForUser } from "src/utils/thread-storage";
 import { text } from "stream/consumers";
 
@@ -144,20 +145,22 @@ export class HuggyService {
 
 
         if(functionName === 'encaminhar_para_vendas'){
-      // 33239
-        const chatId = chat.id;
-        
-          const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
-          const payload = {
-            "stepId": 33242,
-          }
-           const res = await axios.put(url, payload, {
-              headers: {
-                Authorization: `Bearer ${this.huggyToken}`,
-                'Content-Type': 'application/json',
-              },  });
 
-            let response = `Workflow atualizado para Encaminhar para Vendas: ${res.data}`;
+
+          const response = await encaminharParaVendas(chat.id, this.huggyToken);
+        // const chatId = chat.id;
+        
+        //   const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
+        //   const payload = {
+        //     "stepId": 33242,
+        //   }
+        //    const res = await axios.put(url, payload, {
+        //       headers: {
+        //         Authorization: `Bearer ${this.huggyToken}`,
+        //         'Content-Type': 'application/json',
+        //       },  });
+
+        //     let response = `Workflow atualizado para Encaminhar para Vendas: ${res.data}`;
             functionResponse = JSON.stringify(response, null, 2);
             console.log('retorno da função:', functionResponse);
       }
@@ -191,48 +194,48 @@ export class HuggyService {
         }
 
 
-        if(functionName === 'add_human_tag_to_the_chat'){
+        // if(functionName === 'add_human_tag_to_the_chat'){
         
-          const chatId = chat.id;
-          const url = `https://api.huggy.app/v3/chats/${chatId}/tabulation`;
-            const tabulationId = 72008;
-          const payload = {
-            tabulationId, // ID da tag "Human in the Chat"
-          };
+        //   const chatId = chat.id;
+        //   const url = `https://api.huggy.app/v3/chats/${chatId}/tabulation`;
+        //     const tabulationId = 72008;
+        //   const payload = {
+        //     tabulationId, // ID da tag "Human in the Chat"
+        //   };
 
       
-          const res = await axios.put(url, payload, {
-            headers: {
-              Authorization: `Bearer ${this.huggyToken}`,
-              'Content-Type': 'application/json',
-            },
-          });
+        //   const res = await axios.put(url, payload, {
+        //     headers: {
+        //       Authorization: `Bearer ${this.huggyToken}`,
+        //       'Content-Type': 'application/json',
+        //     },
+        //   });
 
-          let response = `Tag "Human in the Chat" adicionada: ${res.data}`;
-          functionResponse = JSON.stringify(response, null, 2);
-          console.log('retorno da função:', functionResponse);
-        }
+        //   let response = `Tag "Human in the Chat" adicionada: ${res.data}`;
+        //   functionResponse = JSON.stringify(response, null, 2);
+        //   console.log('retorno da função:', functionResponse);
+        // }
 
 
-        if(functionName === 'transfer_to_human'){
-          const chatId = chat.id;
-          const agentId = 20428;
-          const url = `https://api.huggy.app/v3/chats/${chatId}/transfer`;
-           const payload = {
-            agentId, // Id do Agente Carlos
-          };
+        // if(functionName === 'transfer_to_human'){
+        //   const chatId = chat.id;
+        //   const agentId = 20428;
+        //   const url = `https://api.huggy.app/v3/chats/${chatId}/transfer`;
+        //    const payload = {
+        //     agentId, // Id do Agente Carlos
+        //   };
       
-          const res = await axios.post(url, payload, {
-            headers: {
-              Authorization: `Bearer ${this.huggyToken}`,
-              'Content-Type': 'application/json',
-            },
-          });   
-          let response = `Transferência para humano realizada: ${res.data}`;
-          functionResponse = JSON.stringify(response, null, 2);
-          console.log('retorno da função:', functionResponse);
+        //   const res = await axios.post(url, payload, {
+        //     headers: {
+        //       Authorization: `Bearer ${this.huggyToken}`,
+        //       'Content-Type': 'application/json',
+        //     },
+        //   });   
+        //   let response = `Transferência para humano realizada: ${res.data}`;
+        //   functionResponse = JSON.stringify(response, null, 2);
+        //   console.log('retorno da função:', functionResponse);
 
-        }
+        // }
 
 
         // Responder à chamada da função com os dados

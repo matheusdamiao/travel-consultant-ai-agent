@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 import { zodResponseFormat } from 'openai/helpers/zod';
 import { z } from 'zod';
 import * as puppeteer from 'puppeteer';
+import axios from 'axios';
 
 export const scrapClubeMomsSite = async (): Promise<any> => {
   const browser = await puppeteer.launch({
@@ -176,4 +177,61 @@ export async function getWeather(
   const data = await response.json();
   console.log('data', data);
   return data.current.temperature_2m;
+}
+
+export const encaminharParaVendas = async (
+  chatId: string,
+  huggyToken: string,
+): Promise<string> => {
+
+
+  ///////////////// Atualiza o workflow para encaminhar para vendas
+              const urlUpdateWorkflow = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
+              const payloadWorkflow = {
+                stepId: 33242, // ID do passo de encaminhamento para vendas
+              };
+
+              const resWorkflow = await axios.put(urlUpdateWorkflow, payloadWorkflow, {
+                headers: {
+                  Authorization: `Bearer ${huggyToken}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+
+              console.log('Workflow atualizado:', resWorkflow.data);
+
+
+   ///////////// Transferência para o agente Carlos
+   
+          const urlTransferToHuman = `https://api.huggy.app/v3/chats/${chatId}/transfer`;
+          const agentId = 20428;
+           const payloadTransfer = {
+            agentId, // Id do Agente Carlos
+          };
+      
+          const resTransfer = await axios.post(urlTransferToHuman, payloadTransfer, {
+            headers: {
+              Authorization: `Bearer ${huggyToken}`,
+              'Content-Type': 'application/json',
+            },
+          });   
+          console.log('Transferência para humano realizada:', resTransfer.data);
+
+
+       /////////////// Atualiza a tabulação para "Human in the Chat"
+            const urlUpdateTabulation = `https://api.huggy.app/v3/chats/${chatId}/tabulation`;
+              const tabulationId = 72008;
+            const bodyTabulation = {
+              tabulationId, // ID da tag "Human in the Chat"
+            };
+
+            const resTabulation = await axios.put(urlUpdateTabulation, bodyTabulation, {
+              headers: {
+                Authorization: `Bearer ${huggyToken}`,
+                'Content-Type': 'application/json',
+              },
+            });
+            console.log('Tabulação atualizada:', resTabulation.data);     
+
+  return `Workflow atualizado para encaminhamento para vendas, tabulação atualizada para "Human in the Chat" e transferência para o agente Carlos realizada.`;
 }
