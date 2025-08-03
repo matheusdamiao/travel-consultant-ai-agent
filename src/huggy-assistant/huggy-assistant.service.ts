@@ -93,6 +93,7 @@ export class HuggyService {
     // Verifica se já existe um run ativo para a thread
     let activeRun: OpenAI.Beta.Threads.Run | null = null;
     const runsList = await this.openai.beta.threads.runs.list(threadId);
+    console.log('Runs List:', runsList);
     if (runsList && runsList.data && Array.isArray(runsList.data)) {
       activeRun = runsList.data.find((run) =>
         ["queued", "in_progress", "requires_action", "cancelling"].includes(run.status)
@@ -136,7 +137,7 @@ export class HuggyService {
     // Obter a resposta do assistente
     const messages = await this.openai.beta.threads.messages.list(threadId);
 
-    console.log('Mensagens:', messages.data);
+    // console.log('Mensagens:', messages.data);
     const lastMessage = messages.data.find((m) => m.role === 'assistant');
 
     return lastMessage?.content || 'Não entendi sua pergunta.';

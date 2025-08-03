@@ -210,7 +210,7 @@ export const encaminharParaVendas = async (
             agentId, // Id do Agente Carlos
           };
 
-          if(chat.situation !== 'wait_for_chat') {
+          if(chat.situation === 'wait_for_chat') {
       
           const resTransfer = await axios.post(urlTransferToHuman, payloadTransfer, {
             headers: {
