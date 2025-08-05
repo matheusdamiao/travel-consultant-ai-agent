@@ -2,6 +2,7 @@ import { Body, Controller, Get, Headers, HttpCode, Post, Query } from '@nestjs/c
 import { AppService } from './app.service';
 import { HuggyService } from './huggy-assistant/huggy-assistant.service';
 import { ConfigService } from '@nestjs/config';
+import { IsChatForHuman } from './utils/functions';
 
 
 
@@ -54,6 +55,13 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
 
   const customerIdFromHuggy = body.messages.receivedAllMessage[0].chat.customer.id
   const chatData = body.messages.receivedAllMessage[0].chat
+
+  let isChatForHuman: boolean = false;
+  isChatForHuman = await IsChatForHuman(chatData.id, this.huggyToken) 
+  if(isChatForHuman) {
+   console.log('Chat é para humano, não processar mensagem');
+  }  
+
   const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy, chatData)
 
  const receivedMsg = body.messages.receivedAllMessage?.[0];

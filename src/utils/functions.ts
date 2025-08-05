@@ -204,21 +204,55 @@ export const encaminharParaVendas = async (
 
    ///////////// Transferência para o agente Carlos
    
-          const urlTransferToHuman = `https://api.huggy.app/v3/chats/${chat.id}/transfer`;
-          const agentId = 20428;
-           const payloadTransfer = {
-            agentId, // Id do Agente Carlos
-          };
+       
 
           if(chat.situation === 'wait_for_chat') {
       
-          const resTransfer = await axios.post(urlTransferToHuman, payloadTransfer, {
-            headers: {
-              Authorization: `Bearer ${huggyToken}`,
-              'Content-Type': 'application/json',
-            },
-          });   
-          console.log('Transferência para humano realizada:', resTransfer.data);
+            let agentsInChat = [];
+            try {
+              const getAgentsInChatUrl = `https://api.huggy.app/v3/chats/${chat.id}/agents`;
+              const resGetAgents = await axios.get(getAgentsInChatUrl, {
+                headers: {
+                  Authorization: `Bearer ${huggyToken}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              console.log('Agentes no chat:', resGetAgents.data);
+              agentsInChat = resGetAgents.data;
+            } catch (error) {
+              console.error('Erro ao obter agentes no chat:', error);
+              throw new Error('Erro ao obter agentes no chat: ' + error.message);
+            }
+
+            if(agentsInChat.length > 0) {
+              let isCarlosInChat = agentsInChat.some((agent: any) => agent.id === 20428);
+              if(isCarlosInChat) {
+                console.log('Agente Carlos já está no chat, não é necessário transferir.');
+                return `Agente Carlos já está no chat, não é necessário transferir.`;
+              }
+            } else{
+
+                  try {
+                    const urlTransferToHuman = `https://api.huggy.app/v3/chats/${chat.id}/transfer`;
+                    const agentId = 20428;
+                    const payloadTransfer = {
+                      agentId, // Id do Agente Carlos
+                    };
+                    const resTransfer = await axios.post(urlTransferToHuman, payloadTransfer, {
+                      headers: {
+                        Authorization: `Bearer ${huggyToken}`,
+                        'Content-Type': 'application/json',
+                      },
+                    });   
+                  console.log('Transferência para humano realizada:', resTransfer.data);
+                } catch (error) {
+                  console.error('Erro ao transferir para humano:', error);
+                  throw new Error('Erro ao transferir para humano: ' + error.message);
+                }
+            }
+
+            
+        
         }
 
        /////////////// Atualiza a tabulação para "Human in the Chat"
@@ -237,4 +271,28 @@ export const encaminharParaVendas = async (
             console.log('Tabulação atualizada:', resTabulation.data);     
 
   return `Workflow atualizado para encaminhamento para vendas, tabulação atualizada para "Human in the Chat" e transferência para o agente Carlos realizada.`;
+}
+
+
+export const IsChatForHuman = async (id: string, huggyToken: any) =>{
+  try {
+    const urlForChat = `https://api.huggy.app/v3/chats/${id}`;
+    const response = await axios.get(urlForChat, {
+      headers: {
+        Authorization: `Bearer ${huggyToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
+    const chat = response.data;
+    // console.log('Chat data:', chat);
+    if(chat.chat_tabulation && chat.chatTabulation.id === 72008) {
+      return true; // Chat is for human
+    } else {
+      return false; // Chat is not for human
+    }
+
+  } catch (error) {
+    console.error('Error fetching chat data:', error);
+    throw new Error('Error fetching chat data: ' + error.message);
+  }
 }
