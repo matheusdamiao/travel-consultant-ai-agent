@@ -221,7 +221,7 @@ export const encaminharParaVendas = async (
               agentsInChat = resGetAgents.data;
             } catch (error) {
               console.error('Erro ao obter agentes no chat:', error);
-              throw new Error('Erro ao obter agentes no chat: ' + error.message);
+              
             }
 
             if(agentsInChat.length > 0) {
@@ -286,8 +286,10 @@ export const IsChatForHuman = async (id: string, huggyToken: any) =>{
     const chat = response.data;
     // console.log('Chat data:', chat);
     if(chat.chat_tabulation && chat.chatTabulation.id === 72008) {
+      console.log('Chat é para humano, não processar mensagem');
       return true; // Chat is for human
     } else {
+      console.log('Chat não é para humano, pode processar mensagem');
       return false; // Chat is not for human
     }
 

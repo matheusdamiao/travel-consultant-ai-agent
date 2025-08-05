@@ -59,7 +59,8 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
   let isChatForHuman: boolean = false;
   isChatForHuman = await IsChatForHuman(chatData.id, this.huggyToken) 
   if(isChatForHuman) {
-   console.log('Chat é para humano, não processar mensagem');
+    console.log('Chat é para humano, não processar mensagem');
+    return 'Chat é para humano, não processar mensagem';
   }  
 
   const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy, chatData)
