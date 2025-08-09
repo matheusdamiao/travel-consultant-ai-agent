@@ -6,6 +6,7 @@ import { WhatsAppAssistantController } from './whatsapp-assistant/whatsapp-assis
 import {  WhatsAppAssistantService } from './whatsapp-assistant/whatsapp-assistant.service';
 import { WhatsAppAssistantModule } from './whatsapp-assistant/whatsapp-assistant.module';
 import { HuggyService } from './huggy-assistant/huggy-assistant.service';
+import { UsinaAiService } from './usinaai-assistant/usinaai-assistant.service';
 
 @Module({
   imports: [
@@ -15,6 +16,6 @@ import { HuggyService } from './huggy-assistant/huggy-assistant.service';
     WhatsAppAssistantModule,
   ],
   controllers: [AppController, WhatsAppAssistantController ],
-  providers: [AppService, WhatsAppAssistantService, HuggyService],
+  providers: [AppService, WhatsAppAssistantService, HuggyService, UsinaAiService],
 })
 export class AppModule {}

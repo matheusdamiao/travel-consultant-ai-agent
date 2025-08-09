@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Headers, HttpCode, Post, Query } from '@nestjs/common';
 import { AppService } from './app.service';
 import { HuggyService } from './huggy-assistant/huggy-assistant.service';
+import { UsinaAiService } from './usinaai-assistant/usinaai-assistant.service';
 import { ConfigService } from '@nestjs/config';
 import { IsChatForHuman } from './utils/functions';
 
@@ -11,10 +12,16 @@ export class AppController {
 
  private readonly huggyToken: string;
  
-  constructor(private readonly configService: ConfigService,
-     private readonly appService: AppService, private readonly huggyService: HuggyService) {
+  constructor(
+    private readonly configService: ConfigService,
+     private readonly appService: AppService,
+      private readonly huggyService: HuggyService,
+      private readonly usinaaiService: UsinaAiService
+    ) {
 
       this.huggyToken =this.configService.get<string>('HUGGY_ACCESS_TOKEN') || '';
+
+
      }
   // @Post()
   // sendMessage(): Promise<string | undefined> {
@@ -63,7 +70,17 @@ async handleWebhook(@Body() body: any, @Headers() headers: any): Promise<string>
     return 'Chat é para humano, não processar mensagem';
   }  
 
-  const assistantRes: any = await this.huggyService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy, chatData)
+
+  let assistantRes: any;
+  if(chatData.entrypoint == '5521992138359'){
+    assistantRes = await this.usinaaiService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy, chatData)
+  } else{
+
+    assistantRes = await this.huggyService.chatWithHuggyAgent(message ?? '', customerIdFromHuggy, chatData)
+  }
+
+
+
 
  const receivedMsg = body.messages.receivedAllMessage?.[0];
   if (!receivedMsg) return 'Webhook recebido com sucesso!';

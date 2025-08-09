@@ -3,7 +3,6 @@ import { ConfigService } from "@nestjs/config";
 import axios from "axios";
 import OpenAI from "openai";
 import { MessageContent } from "openai/resources/beta/threads/messages";
-import { encaminharParaVendas } from "src/utils/functions";
 import { getThreadForUser, saveThreadForUser } from "src/utils/thread-storage";
 
 
@@ -22,7 +21,7 @@ interface RequiredAction {
 }
 
 @Injectable()
-export class HuggyService {
+export class UsinaAiService {
    private openai: OpenAI;
     private assistantId: string | any;
     private readonly huggyToken: string;
@@ -32,7 +31,7 @@ export class HuggyService {
       this.openai = new OpenAI({
         apiKey: this.configService.get<string>('OPENAI_API_KEY'),
       });
-      this.assistantId = this.configService.get<string>('ASSISTANT_ID_HUGGY');
+      this.assistantId = this.configService.get<string>('ASSISTANT_ID_USINAAI');
       this.huggyToken =this.configService.get<string>('HUGGY_ACCESS_TOKEN') || '';
     }
 
@@ -142,6 +141,10 @@ export class HuggyService {
     return lastMessage?.content || 'Não entendi sua pergunta.';
   }
 
+
+
+
+
   private async handleFunctionCalls(
     threadId: string,
     runId: string,
@@ -156,27 +159,28 @@ export class HuggyService {
 
       console.log('Chamando função:', functionName);
 
-      if(functionName === 'registrar_interesse'){
-        const chatId = chat.id;
-        const url = `https://api.huggy.app/v3/chats/${chatId}/workflow`;
-        const payload = { "stepId": 33239 };
-        const res = await axios.put(url, payload, {
-          headers: {
-            Authorization: `Bearer ${this.huggyToken}`,
-            'Content-Type': 'application/json',
-          },
-        });
-        console.log('Workflow atualizado:', res);
-        let response = `Workflow atualizado para Pré-qualificação: ${res.data}`;
-        functionResponse = JSON.stringify(response, null, 2);
-        console.log('retorno da função:', functionResponse);
+
+      if(functionName === 'encaminhar_para_agendamento'){
+
+
+         const urlUpdateWorkflow = `https://api.huggy.app/v3/chats/${chat.id}/workflow`;
+              const payloadWorkflow = {
+                stepId: 33242, // ID do passo de encaminhamento para vendas
+              };
+
+              const resWorkflow = await axios.put(urlUpdateWorkflow, payloadWorkflow, {
+                headers: {
+                  Authorization: `Bearer ${this.huggyToken}`,
+                  'Content-Type': 'application/json',
+                },
+              });
+              console.log('Workflow atualizado:', resWorkflow.data);
+              let response = `Workflow atualizado para Pré-qualificação: ${resWorkflow.data}`;
+                functionResponse = JSON.stringify(response, null, 2);
+            console.log('retorno da função:', functionResponse);
       }
 
-      if(functionName === 'encaminhar_para_vendas'){
-        const response = await encaminharParaVendas(chat, this.huggyToken);
-        functionResponse = JSON.stringify(response, null, 2);
-        console.log('retorno da função:', functionResponse);
-      }
+
 
       if(functionName === 'enviar_mensagem_interna'){
         const args = JSON.parse(toolCall.function.arguments);
